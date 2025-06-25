@@ -1,10 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -19,8 +20,8 @@
         <p id="Welcome"></p>
         <h4>Choose your avatar:</h4>
         <div class="avatars">
-            <img src="mukka.png" alt="Avatar 1" class="avatar" onclick="selectAvatar('avatar1',this)">
-            <img src="mukka1.png" alt="Avatar 2" class="avatar" onclick="selectAvatar('avatar2',this)">
+            <img src="{% static 'mukka.png' %}" alt="Avatar 1" class="avatar" onclick="selectAvatar('avatar1',this)">
+            <img src="{% static 'mukka1.png' %}" alt="Avatar 2" class="avatar" onclick="selectAvatar('avatar2',this)">
         </div>
 
         <h4>Choose your weapon:</h4>
@@ -388,12 +389,15 @@
             
             let tbody = document.getElementById("lb-body");
             tbody.innerHTML = "";
+
+            const avatar1Url = "{% static 'mukka.png' %}";
+            const avatar2Url = "{% static 'mukka1.png' %}";
             
             leaderboardData.forEach((player, index) => {
                 let row = `
                     <tr>
                         <td>${index + 1}</td>
-                        <td><img src="${player.avatar === 'avatar1' ? 'mukka.png' : 'mukka1.png'}" alt="Avatar" style="width: 30px; height: 30px;"></td>
+                        <td><img src="${player.avatar === 'avatar1' ? avatar1Url : avatar2Url}" alt="Avatar" style="width: 30px; height: 30px;"></td>
                         <td>${player.name}</td>
                         <td>${player.language}</td>
                         <td>${player.level}</td>

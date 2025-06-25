@@ -17,5 +17,6 @@ def save(request):
         User.objects.create(name=name, avatar=avatar, language=language, score=score)
         return JsonResponse({'message': 'Data saved successfully'})
 
-        
+def index(request):
+    return render(request, 'index.html')     
  
