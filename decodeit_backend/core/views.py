@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import json
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import User
 # Create your views here.
 @csrf_exempt
@@ -19,4 +19,4 @@ def save(request):
 
 def index(request):
     return render(request, 'index.html')     
- 
+    
