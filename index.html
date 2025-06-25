@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>DeCodeIt</title>
+</head>
+
+<body>
+    <section class="header" id="Welcome-screen">
+        <h1>DeCodeIt</h1>
+        <h4>Enter you name: </h4>
+        <input type="text" id="name" placeholder="Type here" onkeydown="clickkey(event)">
+        <p id="Welcome"></p>
+        <h4>Choose your avatar:</h4>
+        <div class="avatars">
+            <img src="mukka.png" alt="Avatar 1" class="avatar" onclick="selectAvatar('avatar1',this)">
+            <img src="mukka1.png" alt="Avatar 2" class="avatar" onclick="selectAvatar('avatar2',this)">
+        </div>
+
+        <h4>Choose your weapon:</h4>
+        <div class="weapon-buttons">
+            <button onclick="choose('Python')">Python</button>
+            <button onclick="choose('JS')">JS</button>
+            <button onclick="choose('C')">C</button>
+            <button onclick="choose('C++')">C++</button>
+            <button onclick="choose('Java')">Java</button>
+        </div>
+        <div style="margin-top: 20px;">
+            <button onclick="showLeaderboard()" class="force-stop">View Leaderboard</button>
+        </div>
+    </section>
+    <section class="main-area" id="question-screen" style="display: none;">
+        <p id="ques">console.log([] + [])</p>
+        <input type="text" id="input" placeholder="Enter your answer here">
+        <button class="check-button" onclick="check()">Check answer</button>
+        <section class="feedback-area" id="feedback"></section>
+        <button class="force-stop" onclick="force_stop()">Force Stop</button>
+    </section>
+    
+    <section class="lb" id="screen" style="display: none;">
+        <h2>Leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Avatar</th>
+                    <th>Name</th>
+                    <th>Language</th>
+                    <th>Level</th>
+                </tr>
+            </thead>
+            <tbody id="lb-body">
+            </tbody>
+        </table>
+        <button onclick="goBack()" class="force-stop">Go Back</button>
+    </section>
+
+    <script>
+        let chooselevel = [];
+        let currentLevel = 0;
+        let selectedAvatar = "";
+        let selectedLanguage = ""; 
+
+        // JavaScript questions
+        const levels = [
+            { question: "console.log([] + [])", answer: "empty" },
+            { question: "console.log(true + false)", answer: "1" },
+            { question: "console.log('5' - 2)", answer: "3" },
+            { question: "console.log('5' + 2)", answer: "52" },
+            { question: "console.log([] == false)", answer: "true" },
+            { question: "console.log(null == undefined)", answer: "true" },
+            { question: "console.log({} + [])", answer: "[object Object]" }
+        ];
+
+        // Python questions
+        const levels1 = [
+            { question: "print(0.1 + 0.2 == 0.3)", answer: "False" },
+            { question: "print([] is [])", answer: "False" },
+            { question: "print(", answer: "Error" },
+            { question: "a = [1, 2, 3]\n\nb = a\n\na += [4, 5]\n\nprint(b)", answer: "[1, 2, 3, 4, 5]" }, 
+            {
+                question: `a = [1, 2, 3]
+        b = a
+        a = a + [4, 5]
+        print(b)`,
+                answer: "[1, 2, 3]"
+            },
+            {
+                question: `a = []
+        def append_twice(lst, val):
+            lst.append(val)
+            lst.append(val)
+        append_twice(a, 1)
+        append_twice(a, 2)
+        print(len(a))`,
+                answer: "4"
+            }, 
+            {
+                question: "funcs = [lambda: i for i in range(3)]\nresults = [f() for f in funcs]\nprint(results)",
+                answer: "[2, 2, 2]"
+            }
+        ];
+
+        // C questions
+        const levels2 = [
+            {
+                question: "#include &lt;stdio&gt;\n\nint main() {\n\n    int a = 5;\n\n    printf(\"%d %d %d\", a++, ++a, a);\n\n    return 0;\n\n}",
+                answer: "5 7 7"
+            },
+            {
+                question: "#include &lt;stdio&gt;\n\nint fun(char *str1) {\n\n     char *str2 = str1;\n\n     while (*++str1);\n\n     return (str1 - str2);\n\n }\n\nint main() {\n\n    char *str = \"GeeksQuiz\";\n\n    printf(\"%d\", fun(str));\n\n    return 0;\n\n }",
+                answer: "9"
+            }, 
+            {
+                question: "#include &lt;stdio&gt;\n\n #define square(x) x*x\n\nint main() {\n\n    int result = square(2 + 3);\n\n    printf(\"%d\", result);\n\n    return 0;\n\n}",
+                answer: "11"
+            }, 
+            {
+                question: "#include &lt;stdio&gt;\n\nint main() {\n\n    int arr[] = {10, 20, 30, 40, 50};\n\n    printf(\"%d\", 3[arr]);\n\n    return 0;\n\n }",
+                answer: "40"
+            }, 
+            {
+                question: "#include &lt;stdio&gt;\n\nint main() {\n\n    unsigned int a = 10;\n\n    int b = -20;\n\n    if (a > b)\n\n        printf(\"Yes\");\n\n    else\n\n        printf(\"No\");\n\n    return 0;\n\n }",
+                answer: "No"
+            },
+            {
+                question: "#include &lt;stdio&gt;\n\nint main() {\n\n    int i = 1;\n\n    i = i++ + ++i;\n\n    printf(\"%d\", i);\n\n    return 0;\n\n }",
+                answer: "4"
+            }, 
+            {
+                question: "#include &lt;stdio&gt;\n\nint main() {\n\n    int arr[] = {1, 2, 3, 4};\n\n    printf(\"%lu\", sizeof(arr) / sizeof(arr[0]));\n\n    return 0;\n\n }",
+                answer: "4"
+            }
+        ];
+
+        // C++ questions
+        const levels3 = [
+            {
+                question: "#include <iostream>\n\n #include <map>\n\n using namespace std;\n\nint main() {\n\n    map<int, int> m;\n\n    m[1]++;\n\n    cout << m[1];\n\n    return 0;\n\n }",
+                answer: "1"
+            },
+            {
+                question: "#include <iostream>\n\n using namespace std;\n\nint main() {\n\n    const int x = 5;\n\n    int* p = (int*)&x;\n\n    *p = 10;\n\n    cout << x << \" \" << *p;\n\n    return 0;\n\n }",
+                answer: "5 10"
+            },
+            {
+                question: "#include <iostream>\n\n using namespace std;\n\nint main() {\n\n    int a = 5;\n\n    int& b = a;\n\n    b = b + 1;\n\n    cout << a << \" \" << b;\n\n    return 0;\n\n }",
+                answer: "6 6"
+            },
+            {
+                question: "#include <iostream>\n\n #include <vector>\n\n using namespace std;\n\nint main() {\n\n    vector<int> v(3, 7);\n\n    v.resize(5);\n\n    cout << v[3] << \" \" << v[4];\n\n    return 0;\n\n }",
+                answer: "0 0"
+            },
+            {
+                question: "#include <iostream>\n\n using namespace std;\n\nclass Test {\n\n public:\n\n     ~Test() {\n\n         cout << \"Destroyed \";\n\n     }\n\n };\n\nint main() {\n\n     Test t1;\n\n     Test* t2 = new Test();\n\n     return 0;\n\n }",
+                answer: "Destroyed"
+            },
+            {
+                question: "#include <iostream>\n\n using namespace std;\n\nint main() {\n\n     int i = 0;\n\n     while (i++ < 5);\n\n     cout << i;\n\n     return 0;\n\n }",
+                answer: "6"
+            },
+            {
+                question: "#include <iostream>\n\n using namespace std;\n\nvoid fun(int x) {\n\n     cout << \"int\";\n\n }\n\nvoid fun(char x) {\n\n     cout << \"char\";\n\n }\n\nint main() {\n\n     fun('a');\n\n     return 0;\n\n }",
+                answer: "char"
+            }
+        ];
+
+        // Java questions
+        const levels4 = [
+            {
+                question: "public class va1 {\n\n     public static void main(String[] args) {\n\n         int[] arr = {1, 2, 3, 4, 5};\n\n         int x = arr[2]++;\n\n         System.out.println(x);\n\n         System.out.println(arr[2]);\n\n     }\n\n }",
+                answer: "3 4"
+            }, 
+            {
+                question: "public class gt2 {\n\n     public static void main(String[] args) {\n\n         String a = \"hello\";\n\n         String b = new String(\"hello\");\n\n         System.out.println(a == b);\n\n     }\n\n }",
+                answer: "false"
+            }, 
+            {
+                question: "public class gt3 {\n\n     static {\n\n         System.out.print(\"A\");\n\n     }\n\n     {\n\n         System.out.print(\"B\");\n\n     }\n\n     public DecodeItJava3() {\n\n         System.out.print(\"C\");\n\n     }\n\n     public static void main(String[] args) {\n\n         new DecodeItJava3();\n\n     }\n\n }",
+                answer: "ABC"
+            }, 
+            {
+                question: "public class gt4 {\n\n     public static void main(String[] args) {\n\n         Integer a = 100;\n\n         Integer b = 100;\n\n         System.out.println(a == b);\n\n     }\n\n }",
+                answer: "true"
+            }, 
+            {
+                question: "public class gt5 {\n\n     public static void main(String[] args) {\n\n         char ch = 'A';\n\n         ch = (char)(ch + 1);\n\n         System.out.println(ch);\n\n     }\n\n }",
+                answer: "B"
+            }, 
+            {
+                question: "public class gt6 {\n\n     public static void main(String[] args) {\n\n         int[] arr = new int[5];\n\n         char ch = '2';\n\n         arr[ch - '0'] = 7;\n\n         System.out.println(arr[2]);\n\n     }\n\n }",
+                answer: "7"
+            }, 
+            {
+                question: "public class gt7 {\n\n     public static void main(String[] args) {\n\n         StringBuilder sb = new StringBuilder(\"Hi\");\n\n         String str = sb.toString();\n\n         sb.append(\"!\");\n\n         System.out.println(str);\n\n     }\n\n }",
+                answer: "Hi"
+            }
+        ];
+
+        function clickkey(e) {
+            if (e.key == 'Enter') {
+                let name = document.getElementById("name").value;
+                if (name != "") {
+                    document.getElementById("Welcome").innerHTML = `
+                    <span style="display:block; margin-bottom: 10px;">Welcome ${name}!!</span>
+                    <span style="display:block; margin-bottom: 50px;">Let's see what have you learnt till now...</span>
+                `;
+                    document.getElementById("Welcome").style.display = "block";
+                } else {
+                    document.getElementById("Welcome").style.display = "none";
+                }
+            }
+        }
+
+        function choose(lang) {
+            if (document.getElementById("name").value.trim() === "") {
+                alert("Please enter your name!");
+                return;
+            }
+            
+            if (selectedAvatar === "") {
+                alert("Please select an avatar!");
+                return;
+            }
+            
+            selectedLanguage = lang;
+            saveGameState();
+    
+            document.getElementById("Welcome-screen").style.display = "none";
+            document.getElementById("question-screen").style.display = "block";
+            currentLevel = 0;
+            if (lang == "JS") {
+                chooselevel = levels;
+            } else if (lang == "Python") {
+                chooselevel = levels1;
+            } else if (lang == "C") {
+                chooselevel = levels2;
+            } else if (lang == "C++") {
+                chooselevel = levels3;
+            } else if (lang == "Java") {
+                chooselevel = levels4;
+            }
+
+            document.getElementById("ques").innerHTML = chooselevel[currentLevel].question.replace(/\n/g, "<br>");
+        }
+
+        function getCookie(name) {
+            return document.cookie
+                .split('; ')
+                .find(row => row.startsWith(name + '='))
+                ?.split('=')[1];
+        }
+
+        function check() {
+            let input = document.getElementById("input").value.trim().toLowerCase().replace(/\s+/g, "");
+            let feedback = document.getElementById("feedback");
+
+            if (input === chooselevel[currentLevel].answer.toLowerCase().replace(/\s+/g, "")) {
+                feedback.innerHTML = "Woohoo!!";
+                currentLevel++;
+                saveGameState();
+                if (currentLevel < chooselevel.length) {
+                    document.getElementById("ques").innerHTML = chooselevel[currentLevel].question.replace(/\n/g, "<br>");
+                    document.getElementById("input").value = "";
+                } else {
+                    document.getElementById("ques").innerHTML = "🎉 You've completed all levels!";
+                    document.getElementById("input").style.display = "none";
+                    document.getElementById("feedback").innerHTML = ""; 
+                }
+            } else {
+                feedback.innerHTML = "You better try hard!!";
+            }
+        }
+
+        let selectAvatarElem = null;
+        function selectAvatar(avatarName, elem) {
+            if (selectAvatarElem) {
+                selectAvatarElem.classList.remove("selected");
+                setTimeout(() => {
+                    elem.classList.add("selected");
+                    selectAvatarElem = elem;
+                }, 100); 
+            } else {
+                elem.classList.add("selected");
+                selectAvatarElem = elem;
+            }
+            selectedAvatar = avatarName;
+            console.log("Selected avatar:", selectedAvatar);
+        }
+
+        function saveToServer() {
+            fetch("/save/", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFTOKEN': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    'name': document.getElementById("name").value,
+                    'avatar': selectedAvatar,
+                    'lang': selectedLanguage,
+                    'level': currentLevel
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error saving to server:', error);
+            });
+        }
+
+        function loadGameState() {
+            let savedName = localStorage.getItem("gameName");
+            let savedAvatar = localStorage.getItem("gameAvatar");  
+            let savedLanguage = localStorage.getItem("gameLanguage");
+            let savedLevel = localStorage.getItem("gameLevel");
+            
+            if (savedLanguage && savedLevel > 0 && savedLevel < 7) {
+                document.getElementById("name").value = savedName;
+                selectedAvatar = savedAvatar;
+                selectedLanguage = savedLanguage;
+                currentLevel = parseInt(savedLevel);
+                
+                if (savedLanguage == "JS") {
+                    chooselevel = levels;
+                } else if (savedLanguage == "Python") {
+                    chooselevel = levels1;
+                } else if (savedLanguage == "C") {
+                    chooselevel = levels2;
+                } else if (savedLanguage == "C++") {
+                    chooselevel = levels3;
+                } else if (savedLanguage == "Java") {
+                    chooselevel = levels4;
+                }
+                
+                document.getElementById("Welcome-screen").style.display = "none";
+                document.getElementById("question-screen").style.display = "block";
+                document.getElementById("ques").innerHTML = chooselevel[currentLevel].question.replace(/\n/g, "<br>");
+            }
+        }
+
+        function force_stop() {
+            document.getElementById("Welcome-screen").style.display = "block";
+            document.getElementById("question-screen").style.display = "none";
+            currentLevel = 0;
+            selectedLanguage = "";
+            document.getElementById("feedback").innerHTML = "";
+            document.getElementById("input").value = "";
+            localStorage.removeItem("gameLanguage");
+            localStorage.removeItem("gameLevel");
+        }
+
+        function saveGameState() {
+            localStorage.setItem("gameName", document.getElementById("name").value);
+            localStorage.setItem("gameAvatar", selectedAvatar);
+            localStorage.setItem("gameLanguage", selectedLanguage);
+            localStorage.setItem("gameLevel", currentLevel);
+       
+            if (currentLevel > 0) {
+                saveToLeaderboard();
+            }
+        }
+
+        function showLeaderboard() {
+            document.getElementById("Welcome-screen").style.display = "none";
+            document.getElementById("question-screen").style.display = "none";
+            document.getElementById("screen").style.display = "block";
+            loadLeaderboardData();
+        }
+
+        function goBack() {
+            document.getElementById("screen").style.display = "none";
+            document.getElementById("Welcome-screen").style.display = "block";
+        }
+
+        function loadLeaderboardData() {
+            let leaderboardData = JSON.parse(localStorage.getItem("leaderboardData")) || [];
+            
+            leaderboardData.sort((a, b) => b.level - a.level || a.name.localeCompare(b.name));
+            
+            let tbody = document.getElementById("lb-body");
+            tbody.innerHTML = "";
+            
+            leaderboardData.forEach((player, index) => {
+                let row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><img src="${player.avatar === 'avatar1' ? 'mukka.png' : 'mukka1.png'}" alt="Avatar" style="width: 30px; height: 30px;"></td>
+                        <td>${player.name}</td>
+                        <td>${player.language}</td>
+                        <td>${player.level}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            
+            if (leaderboardData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No players yet! Be the first to play!</td></tr>';
+            }
+        }
+
+        function saveToLeaderboard() {
+            let leaderboardData = JSON.parse(localStorage.getItem("leaderboardData")) || [];
+            
+            let existingPlayer = leaderboardData.find(p => p.name === document.getElementById("name").value);
+            
+            if (existingPlayer) {
+                if (currentLevel > existingPlayer.level) {
+                    existingPlayer.level = currentLevel;
+                    existingPlayer.language = selectedLanguage;
+                    existingPlayer.avatar = selectedAvatar;
+                }
+            } else {
+                leaderboardData.push({
+                    name: document.getElementById("name").value,
+                    avatar: selectedAvatar,
+                    language: selectedLanguage,
+                    level: currentLevel
+                });
+            }
+            
+            localStorage.setItem("leaderboardData", JSON.stringify(leaderboardData));
+        }
+
+        window.onload = loadGameState;
+    </script>
+
+</body>
+
+</html>
