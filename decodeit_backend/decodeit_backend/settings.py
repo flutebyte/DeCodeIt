@@ -116,7 +116,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'decodeit_backend' / 'static',  # Your actual static dir
 ]
 
-STATIC_ROOT = BASE_DIR / 'decodeit_backend' / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
